@@ -13,7 +13,7 @@ def listallcities(city_id=None):
     if c is None:
         abort(404)
     else:
-        return (jsonify(city.to_dict()), 200)
+        return (jsonify(c.to_dict()), 200)
 
 @app_views.route('/cities/<city_id>', methods=['DELETE'])
 def deletecity(city_id=None):
