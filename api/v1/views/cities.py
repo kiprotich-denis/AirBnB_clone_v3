@@ -22,7 +22,7 @@ def deletecity(city_id=None):
     if c is None:
         abort(404)
     else:
-        city.delete()
+        storage.delete(ct)
         storage.save()
         return (jsonify({}), 200)
 
@@ -32,13 +32,16 @@ def createcity():
     s = storage.get("State", state_id)
     if s is None:
         abort(404)
-    c = storage.request.get_json("City", silent=True)
+    c = storage.request.get_json()
     if c == None:
         return (400, "Not a JSON")
     elif "name" not in  c.keys():
         return (400, "Missing name")
     else:
-        return (jsonify({}), 201)
+        instance = City(**data)
+        instance.state_id = state.id
+        instance.save()
+        return (jsonify(instance.to_dict()), 201)
 
 @app_views.route('/cities/<city_id>', method=['PUT'])
 def updatecity(city_id=None):
@@ -46,6 +49,14 @@ def updatecity(city_id=None):
     ct = storage.get("City", city_id)
     if ct is None:
         abort(404)
-    c = request.get_json("City", silent=True)
+    c = request.get_json()
     if c is None:
         abort(400, "Not a JSON")
+    else:
+        for key, value in c.items():
+            if key in ['id', 'created_at', 'updated_at']:
+                pass
+            else:
+                setattr(ct, key, value)
+        storage.save()
+        return (jsonify(ct.to_dict()), 200)
